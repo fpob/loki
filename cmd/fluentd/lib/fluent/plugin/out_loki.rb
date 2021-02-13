@@ -278,13 +278,11 @@ module Fluent
           when :key_value
             formatted_labels = []
             record.each do |k, v|
-              # Escape double quotes and backslashes by prefixing them with a backslash
-              v = v.to_s.gsub(%r{(["\\])}, '\\\\\1')
-              if v.include?(' ') || v.include?('=')
-                formatted_labels.push(%(#{k}="#{v}"))
-              else
-                formatted_labels.push(%(#{k}=#{v}))
-              end
+              # Format hash as json
+              v = Yajl.dump(v) if v.is_a?(Hash)
+              # This regular expression will validate true if the string doesn't need escaping.
+              v = v.strip.dump unless v =~ /\A[\w\.\-\+\%\_\,\:\;\/]*\z/i
+              formatted_labels.push(%(#{k}=#{v}))
             end
             line = formatted_labels.join(' ')
           end
