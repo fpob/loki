@@ -280,8 +280,11 @@ module Fluent
             record.each do |k, v|
               # Format hash as json
               v = Yajl.dump(v) if v.is_a?(Hash)
-              # This regular expression will validate true if the string doesn't need escaping.
-              v = v.strip.dump unless v =~ /\A[\w\.\-\+\%\_\,\:\;\/]*\z/i
+              # Escape strings
+              if v.is_a?(String)
+                # This regular expression will validate true if the string doesn't need escaping.
+                v = v.strip.dump unless v =~ /\A[\w\.\-\+\%\_\,\:\;\/]*\z/i
+              end
               formatted_labels.push(%(#{k}=#{v}))
             end
             line = formatted_labels.join(' ')
